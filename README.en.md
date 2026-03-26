@@ -172,6 +172,8 @@ Then just say in chat:
 
 > Generate TypeScript types for `cancelPublishApi` (call the generate_types tool)
 
+![alt text](image-1.png)
+
 ### Cursor
 
 Add to `.cursor/mcp.json`:
@@ -278,7 +280,19 @@ Currently unauthenticated requests only. Open `/v3/api-docs` in your browser, sa
 
 **Q: Getting `sh: tsx: command not found` error?**
 
-`tsx` is not installed globally. Fix it one of these ways:
+After installing the package, if you run:
+
+```bash
+npx tsx packages/swagger-ts-gen/bin/index.ts \
+  --file <path> \
+  --swagger <url>
+```
+
+As shown below:
+
+![alt text](image.png)
+
+And get `sh: tsx: command not found`, it means `tsx` is not installed globally. Fix it one of these ways:
 
 Run from the local `node_modules`:
 
@@ -288,8 +302,18 @@ npx --prefix packages/swagger-ts-gen tsx packages/swagger-ts-gen/bin/index.ts \
   --swagger <url>
 ```
 
+Or use `node_modules/.bin/tsx` directly:
+
+```bash
+packages/swagger-ts-gen/node_modules/.bin/tsx packages/swagger-ts-gen/bin/index.ts \
+  --file <path> \
+  --swagger <url>
+```
+
 Or install `tsx` globally (recommended):
 
 ```bash
 npm install -g tsx
 ```
+
+After that the original command will work.
