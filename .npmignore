@@ -1,0 +1,7 @@
+src/
+bin/
+node_modules/
+.vscode/
+*.test.ts
+tsconfig.json
+package-lock.json

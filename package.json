@@ -1,0 +1,48 @@
+{
+  "name": "swagger-ts-gen",
+  "version": "0.1.0",
+  "description": "Auto-generate TypeScript types from Swagger/OpenAPI docs for frontend API files. Supports CLI and MCP Server mode.",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest --run",
+    "prepublishOnly": "npm run build"
+  },
+  "bin": {
+    "swagger-ts-gen": "./dist/bin/index.js"
+  },
+  "main": "dist/src/index.js",
+  "types": "dist/src/index.d.ts",
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "keywords": [
+    "swagger",
+    "openapi",
+    "typescript",
+    "codegen",
+    "type-generation",
+    "mcp",
+    "api"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/YOUR_USERNAME/swagger-ts-gen.git"
+  },
+  "homepage": "https://github.com/YOUR_USERNAME/swagger-ts-gen#readme",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "typescript": "^5.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "fast-check": "^3.0.0",
+    "tsx": "^4.0.0",
+    "vitest": "^1.0.0"
+  }
+}
