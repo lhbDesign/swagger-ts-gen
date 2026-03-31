@@ -10,9 +10,10 @@ Supports two modes: **CLI** and **MCP Server (AI IDE integration)**.
 
 ## Table of Contents
 
-- [Installation](#installation)
+- [Install & Run Modes](#install--run-modes)
 - [Quick Start](#quick-start)
 - [Configuration](#configuration)
+- [Config Resolution & Priority](#config-resolution--priority)
 - [CLI Usage](#cli-usage)
 - [MCP Server Usage](#mcp-server-usage)
 - [API Tool Compatibility](#api-tool-compatibility)
@@ -21,53 +22,92 @@ Supports two modes: **CLI** and **MCP Server (AI IDE integration)**.
 
 ---
 
-## Installation
+## Install & Run Modes
 
-### Option 1: Global install from npm (recommended)
+### Option1: Global install (for frequent usage)
 
 ```bash
 npm install -g swagger-ts-mcp
 ```
 
-Then use it anywhere:
+Run:
 
 ```bash
 swagger-ts-mcp --file src/api/user.ts --swagger https://your-api/doc.html
 ```
 
-> Note: The `--file` path is relative to your current working directory. Make sure to run the command from your project root, or use an absolute path.
+Note: `--file` is resolved relative to your current working directory. Run from project root or use an absolute path.
 
-### Option 2: npx (no install)
+---
+
+### Option2: Install in your project (recommended for teams)
+
+> Version is pinned in your project, so everyone runs the same tool version.
+
+npm:
+
+```bash
+npm i -D swagger-ts-mcp
+npx --no-install swagger-ts-mcp --file src/api/user.ts --swagger https://your-api/doc.html
+```
+
+pnpm:
+
+```bash
+pnpm add -D swagger-ts-mcp
+pnpm exec swagger-ts-mcp --file src/api/user.ts --swagger https://your-api/doc.html
+```
+
+yarn:
+
+```bash
+yarn add -D swagger-ts-mcp
+yarn swagger-ts-mcp --file src/api/user.ts --swagger https://your-api/doc.html
+```
+
+---
+
+### Option3: npx temporary run (no install)
 
 ```bash
 npx swagger-ts-mcp --file src/api/user.ts --swagger https://your-api/doc.html
 ```
 
+> If not installed locally, `npx` may fetch from npm.
+> If you only want the local installed version, use `npx --no-install swagger-ts-mcp`.
+
 ---
 
 ## Quick Start
 
-**Step 1**: Create `swagger-ts-gen.config.json` in your project root:
+**Step1**: Create `swagger-ts-gen.config.json` in project root:
 
 ```json
 {
-  "swaggerUrl": "https://your-api/doc.html",
-  "defaultFiles": ["src/api/user.ts"]
+ "swaggerUrl": "https://your-api/doc.html",
+ "defaultFiles": ["src/api/user.ts"]
 }
 ```
 
-**Step 2**: Run:
+**Step2**: Run (choose one based on your install mode):
 
 ```bash
+# A. Global install
 swagger-ts-mcp
+
+# B. Installed in project (npm)
+npx --no-install swagger-ts-mcp
+
+# C. Installed in project (pnpm)
+pnpm exec swagger-ts-mcp
 ```
 
 The tool will automatically:
 
-1. Parse the API file and find functions with `any` or untyped parameters
-2. Fetch the matching schema from the Swagger doc
-3. Generate TypeScript interfaces and insert them above the function
-4. Replace `any` with the generated type name
+1. Parse API files and find functions with `any` or untyped parameters
+2. Fetch matching schemas from Swagger docs
+3. Generate TypeScript interfaces/types above function definitions
+4. Replace `any` with generated type names
 
 **Example**:
 
@@ -76,7 +116,7 @@ Before:
 ```typescript
 // Cancel publish
 export async function cancelPublishApi(params?: any) {
-  return requestClient.get("/model/publish/cancel", { params });
+ return requestClient.get("/model/publish/cancel", { params });
 }
 ```
 
@@ -85,13 +125,13 @@ After:
 ```typescript
 /** Cancel publish request params */
 export interface CancelPublishParams {
-  /** Model ID */
-  modelId?: number;
+ /** Model ID */
+ modelId?: number;
 }
 
 // Cancel publish
 export async function cancelPublishApi(params?: CancelPublishParams) {
-  return requestClient.get("/model/publish/cancel", { params });
+ return requestClient.get("/model/publish/cancel", { params });
 }
 ```
 
@@ -103,217 +143,289 @@ Create `swagger-ts-gen.config.json` in your project root:
 
 ```json
 {
-  "swaggerUrl": "https://your-api/doc.html",
-  "defaultFiles": ["src/api/user.ts", "src/api/order.ts"],
-  "endpointPrefix": "/algo",
-  "clientName": "requestClient",
-  "outputStyle": "interface"
+ "swaggerUrl": "https://your-api/doc.html",
+ "defaultFiles": ["src/api/user.ts", "src/api/order.ts"],
+ "endpointPrefix": "/algo",
+ "clientName": "requestClient",
+ "outputStyle": "interface"
 }
 ```
 
-| Option           | Type                      | Default           | Description                                                                                       |
-| ---------------- | ------------------------- | ----------------- | ------------------------------------------------------------------------------------------------- |
-| `swaggerUrl`     | `string`                  | —                 | Swagger doc URL. Supports `doc.html`, `/v3/api-docs`, `/v2/api-docs`                              |
-| `defaultFiles`   | `string[]`                | —                 | Default API files to process                                                                      |
-| `endpointPrefix` | `string`                  | `""`              | Path prefix to strip. If code uses `/algo/user/list` but Swagger has `/user/list`, set to `/algo` |
-| `clientName`     | `string`                  | `"requestClient"` | HTTP client object name, e.g. `axios`, `http`                                                     |
-| `outputStyle`    | `"interface"` \| `"type"` | `"interface"`     | Output type style                                                                                 |
+| Option | Type | Default | Description |
+| ---------------- | ----------------------- | ----------------- | ------------------------------------------------------------------------------------------------ |
+| `swaggerUrl` | `string` | — | Swagger doc URL. Supports `doc.html`, `/v3/api-docs`, `/v2/api-docs` |
+| `defaultFiles` | `string[]` | — | Default API file path list |
+| `endpointPrefix` | `string` | `""` | API path prefix. If code uses `/algo/user/list` but Swagger has `/user/list`, set `/algo` |
+| `clientName` | `string` | `"requestClient"` | HTTP client object name, e.g. `axios`, `http`, `request` |
+| `outputStyle` | `"interface" \| "type"` | `"interface"` | Generated type style |
+
+---
+
+## Config Resolution & Priority
+
+- Reads config from: `{current working directory}/swagger-ts-gen.config.json`
+- That means it loads config from the directory where you run the command
+- `--file` relative path is also resolved from current working directory
+- CLI flags override config values:
+ - `--swagger`
+ - `--endpoint-prefix`
+ - `--client-name`
+
+Example:
+
+```bash
+npx --no-install swagger-ts-mcp \
+ --file src/api/algo/scheme.ts \
+ --swagger https://optimos.dev.d2d.ai/api/algo/doc.html \
+ --endpoint-prefix /algo
+```
 
 ---
 
 ## CLI Usage
 
+> Note: #1 ~ #3 are for global install. If installed in-project, use #4 / #5.
+
 ```bash
-# Use config file (recommended)
+#1) Use config file (recommended, requires global install)
 swagger-ts-mcp
 
-# Specify file and swagger URL
+#2) Specify file and swagger URL (requires global install)
 swagger-ts-mcp --file src/api/user.ts --swagger https://your-api/doc.html
 
-# Dry run (preview only, no file changes)
+#3) Dry run (no file changes, requires global install)
 swagger-ts-mcp --file src/api/user.ts --swagger https://your-api/doc.html --dry-run
+
+#4) Project-local install (npm)
+npx --no-install swagger-ts-mcp --file src/api/user.ts --swagger https://your-api/doc.html
+
+#5) Project-local install (pnpm)
+pnpm exec swagger-ts-mcp --file src/api/user.ts --swagger https://your-api/doc.html
 ```
 
-### All Options
+### All Flags
 
-| Flag                | Description                   | Example                                      |
+| Flag | Description | Example |
 | ------------------- | ----------------------------- | -------------------------------------------- |
-| `--file`            | Target API file path          | `--file src/api/user.ts`                     |
-| `--swagger`         | Swagger doc URL               | `--swagger https://api.example.com/doc.html` |
-| `--dry-run`         | Preview mode, no file changes | `--dry-run`                                  |
-| `--mcp`             | Start as MCP Server           | `--mcp`                                      |
-| `--endpoint-prefix` | Path prefix override          | `--endpoint-prefix /algo`                    |
-| `--client-name`     | HTTP client name override     | `--client-name axios`                        |
+| `--file` | Target API file path | `--file src/api/user.ts` |
+| `--swagger` | Swagger doc URL | `--swagger https://api.example.com/doc.html` |
+| `--dry-run` | Preview mode, no file changes | `--dry-run` |
+| `--mcp` | Start as MCP Server | `--mcp` |
+| `--endpoint-prefix` | API path prefix override | `--endpoint-prefix /algo` |
+| `--client-name` | HTTP client name override | `--client-name axios` |
 
 ---
 
 ## MCP Server Usage
 
-MCP (Model Context Protocol) mode lets AI IDEs like Kiro and Cursor call this tool directly.
+MCP (Model Context Protocol) mode allows AI IDEs to call this tool directly to generate types.
 
-### Kiro
+### Configure MCP Server — Kiro
 
-Add to `.kiro/settings/mcp.json`:
+Add to your project's `.kiro/settings/mcp.json`:
 
 ```json
 {
-  "mcpServers": {
-    "swagger-ts-mcp": {
-      "command": "npx",
-      "args": ["swagger-ts-mcp", "--mcp"],
-      "disabled": false,
-      "autoApprove": ["generate_types"]
-    }
-  }
+ "mcpServers": {
+ "swagger-ts-mcp": {
+ "command": "npx",
+ "args": ["swagger-ts-mcp", "--mcp"],
+ "disabled": false,
+ "autoApprove": ["generate_types"]
+ }
+ }
 }
 ```
 
-Then just say in chat:
+### Configure MCP Server — Cursor
 
-> Generate TypeScript types for `cancelPublishApi` (call the generate_types tool)
+Add in `.cursor/mcp.json` or your IDE MCP config:
+
+```json
+{
+ "mcpServers": {
+ "swagger-ts-mcp": {
+ "command": "npx",
+ "args": ["swagger-ts-mcp", "--mcp"]
+ }
+ }
+}
+```
+
+After configuration, in Cursor press `Cmd+Shift+P`, search `MCP`, and click **Reload MCP Servers**.
+
+> Depending on version/config, if MCP config file cannot be read, create the file as prompted and paste the JSON above.
+
+### Use in AI IDE
+
+**Kiro**: say in chat:
+
+> Help me generate TypeScript types for `cancelPublishApi` (call `generate_types` tool)
 
 ![alt text](image-1.png)
 
-### Cursor
+**Cursor**: in Composer (`Cmd+I`) or Chat:
 
-Add to `.cursor/mcp.json`:
+> Use the swagger-ts-mcp tool to generate TypeScript types for `cancelPublishApi`, file path: `src/api/user.ts`
 
-```json
-{
-  "mcpServers": {
-    "swagger-ts-mcp": {
-      "command": "npx",
-      "args": ["swagger-ts-mcp", "--mcp"]
-    }
-  }
-}
-```
-
-Press `Cmd+Shift+P` → search `MCP` → click **Reload MCP Servers**.
-
-> If you see an error saying the MCP config file cannot be read, just create the file at `.cursor/mcp.json` and paste the JSON above.
-
-### Tool Parameters
+### MCP Tool Parameters
 
 Tool name: `generate_types`
 
-| Parameter       | Type       | Required | Description                    |
-| --------------- | ---------- | -------- | ------------------------------ |
-| `filePath`      | `string`   | ✅       | Target API file path           |
-| `swaggerUrl`    | `string`   | —        | Swagger URL (overrides config) |
-| `functionNames` | `string[]` | —        | Only process these functions   |
-| `dryRun`        | `boolean`  | —        | Preview mode, no file changes  |
+| Parameter | Type | Required | Description |
+|--------------- | ---------- | -------- | -------------------------------------------------- |
+| `filePath` | `string` | ✅ | Target API file path |
+| `swaggerUrl` | `string` | — | Swagger doc URL (overrides config) |
+| `functionNames` | `string[]` | — | Process only specified functions |
+| `dryRun` | `boolean` | — | Preview mode, no file changes |
 
 ---
 
 ## API Tool Compatibility
 
-| Tool                | How to use                                                                                    |
-| ------------------- | --------------------------------------------------------------------------------------------- |
-| Swagger / SpringDoc | Pass `doc.html` URL directly, auto-converts to `/v3/api-docs` or `/v2/api-docs`               |
-| Knife4j             | Same as Swagger, fully compatible                                                             |
-| YApi                | Use export URL: `https://your-yapi.com/api/plugin/export?type=swagger&pid=<id>&token=<token>` |
-| Apifox              | Export as OpenAPI 3.0 URL from project settings                                               |
-| Postman             | Export collection as OpenAPI 3.0 JSON                                                         |
+### Swagger / SpringDoc (default supported)
+
+Pass `doc.html` directly. The tool auto-converts to `/v3/api-docs` or `/v2/api-docs`:
+
+```bash
+swagger-ts-mcp --file src/api/user.ts --swagger https://your-api/doc.html
+```
+
+### Knife4j
+
+Fully compatible with Swagger. Use directly.
+
+### YApi
+
+Use YApi export URL:
+
+```text
+https://your-yapi.com/api/plugin/export?type=swagger&pid=<project_id>&token=<project_token>
+```
+
+```bash
+swagger-ts-mcp --file src/api/user.ts --swagger "https://your-yapi.com/api/plugin/export?type=swagger&pid=123&token=abc123"
+```
+
+### Apifox
+
+Export an OpenAPI3.0 online URL in Apifox and use it directly.
 
 ---
 
 ## How It Works
 
-```
+```text
 API file (*.ts)
-    ↓ Parse AST, find requestClient.xxx() calls
-    ↓ Filter functions with any or untyped params
-    ↓
+ ↓ Parse AST, find requestClient.xxx() calls
+ ↓ Filter functions with any/untyped params
+ ↓
 Swagger doc
-    ↓ Match endpoint + method
-    ↓ Extract request/response schema
-    ↓
+ ↓ Match endpoint + method
+ ↓ Extract request schema and response schema
+ ↓
 TypeScript type generation
-    ↓ Schema → interface/type
-    ↓ Handle $ref, oneOf/anyOf/allOf
-    ↓
-Write to file
-    ↓ Insert type above function
-    ↓ Replace any with generated type name
+ ↓ Schema → interface/type definitions
+ ↓ Handle recursive $ref, oneOf/anyOf/allOf
+ ↓
+Write back to file
+ ↓ Insert type definitions above function
+ ↓ Replace any with generated type names
 ```
 
-### Naming Convention
+### Naming Rules
 
-| Type                | Rule               | Example             |
-| ------------------- | ------------------ | ------------------- |
-| Request params      | `{BaseName}Params` | `GetUserListParams` |
-| Response body       | `{BaseName}Result` | `GetUserListResult` |
-| Response data field | `{BaseName}Data`   | `GetUserListData`   |
+| Type | Rule | Example |
+| -------------------- | ------------------ | ------------------ |
+| Request params type | `{BaseName}Params` | `GetUserListParams` |
+| Response body type | `{BaseName}Result` | `GetUserListResult` |
+| Response data type | `{BaseName}Data` | `GetUserListData` |
 
-Function name conversion: `getUserListApi` → strip `Api` suffix → capitalize → `GetUserList`
+Function name conversion: `getUserListApi` → remove `Api` suffix → capitalize first letter → `GetUserList`
 
 ---
 
 ## FAQ
 
-**Q: The path in code has a prefix but Swagger doesn't. How to handle?**
+**Q: Why does `npx swagger-ts-mcp` try to download from npm?**
 
-Use `endpointPrefix`. If code has `/algo/user/list` but Swagger has `/user/list`:
+A: Because package is not installed locally in current project. `npx` may fetch from npm by default.
+If you only want local installed version:
 
-```json
-{ "endpointPrefix": "/algo" }
+```bash
+npx --no-install swagger-ts-mcp
 ```
 
-**Q: My project uses axios instead of requestClient.**
+**Q: I installed it in my project. What should I use?**
+
+A:
+
+- npm project: `npx --no-install swagger-ts-mcp ...`
+- pnpm project: `pnpm exec swagger-ts-mcp ...`
+- yarn project: `yarn swagger-ts-mcp ...`
+
+**Q: If installed locally, does it still read `swagger-ts-gen.config.json`?**
+
+A: Yes. Whether global install, local install, or npx run, it always reads config from the current working directory.
+
+**Q: I got ENOENT for `--file`. Why?**
+
+A: Check whether `--file` is relative to your current directory.
+If you run at project root, usually use `src/...` instead of repeating project prefix.
+
+**Q: Code path has a prefix, but Swagger path doesn't.**
+
+A: Use `--endpoint-prefix` or set `endpointPrefix` in config.
+
+**Q: My project uses axios instead of requestClient. What should I do?**
 
 ```json
 { "clientName": "axios" }
 ```
 
-**Q: How to preview without modifying files?**
+**Q: I want to preview generated results without modifying files.**
 
-Add `--dry-run` flag.
+Add `--dry-run`.
 
-**Q: Only want to process specific functions?**
+**Q: I only want to process specific functions.**
 
-Pass `functionNames` in MCP mode.
+In MCP mode, pass `functionNames`.
 
-**Q: Swagger requires authentication.**
+**Q: What if Swagger docs require login/authentication?**
 
-Currently unauthenticated requests only. Open `/v3/api-docs` in your browser, save the JSON locally, and pass it as the URL.
+Auth headers are not supported currently. You can open `/v3/api-docs` in browser, save the JSON locally, then use that.
 
-**Q: Getting `sh: tsx: command not found` error?**
+**Q: `npx tsx packages/swagger-ts-gen/bin/index.ts` errors out?**
 
-After installing the package, if you run:
+After downloading the package:
 
 ```bash
 npx tsx packages/swagger-ts-gen/bin/index.ts \
-  --file <path> \
-  --swagger <url>
+ --file <path> \
+ --swagger <swagger-url>
 ```
 
-As shown below:
-
-![alt text](image.png)
-
-And get `sh: tsx: command not found`, it means `tsx` is not installed globally. Fix it one of these ways:
-
-Run from the local `node_modules`:
+If you see `sh: tsx: command not found`, `tsx` is not installed globally.
+Use local `node_modules` from `packages/swagger-ts-gen`:
 
 ```bash
 npx --prefix packages/swagger-ts-gen tsx packages/swagger-ts-gen/bin/index.ts \
-  --file <path> \
-  --swagger <url>
+ --file <path> \
+ --swagger <swagger-url>
 ```
 
-Or use `node_modules/.bin/tsx` directly:
+Or call local binary directly:
 
 ```bash
 packages/swagger-ts-gen/node_modules/.bin/tsx packages/swagger-ts-gen/bin/index.ts \
-  --file <path> \
-  --swagger <url>
+ --file <path> \
+ --swagger <swagger-url>
 ```
 
-Or install `tsx` globally (recommended):
+Or install `tsx` globally:
 
 ```bash
 npm install -g tsx
 ```
 
-After that the original command will work.
+Then your original command will work.
