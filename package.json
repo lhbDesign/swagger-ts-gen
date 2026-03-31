@@ -1,10 +1,10 @@
 {
   "name": "swagger-ts-mcp",
-  "version": "0.1.1",
+  "version": "0.1.4",
   "description": "Auto-generate TypeScript types from Swagger/OpenAPI docs for frontend API files. Supports CLI and MCP Server mode.",
   "type": "module",
   "scripts": {
-    "build": "tsc",
+    "build": "rm -rf dist && tsc",
     "test": "vitest --run",
     "prepublishOnly": "npm run build"
   },
@@ -31,7 +31,7 @@
     "type": "git",
     "url": "git+https://github.com/lhbDesign/swagger-ts-gen.git"
   },
-  "homepage": "https://github.com/lhbDesign/swagger-ts-gen#readme",
+  "homepage": "https://github.com/lhbDesign/swagger-ts-gen/blob/main/README.md",
   "engines": {
     "node": ">=18.0.0"
   },

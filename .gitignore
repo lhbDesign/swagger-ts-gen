@@ -4,3 +4,5 @@ dist/
 *.d.ts.map
 .env
 .kiro
+juejin-article.md
+.claude

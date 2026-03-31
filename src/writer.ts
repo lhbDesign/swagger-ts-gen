@@ -15,7 +15,6 @@ export function writeTypes(options: WriteOptions): WriteResult {
   const { filePath, insertions, dryRun } = options;
 
   const raw = fs.readFileSync(filePath, 'utf8');
-  const endsWithNewline = raw.endsWith('\n');
   const lines = raw.split('\n');
   // If file ends with \n, split produces a trailing empty string — keep it for reconstruction
   // but work with the logical lines (all entries including trailing empty)
@@ -89,7 +88,7 @@ export function writeTypes(options: WriteOptions): WriteResult {
   };
 
   if (!dryRun) {
-    const output = endsWithNewline ? lines.join('\n') : lines.join('\n');
+    const output = lines.join('\n');
     fs.writeFileSync(filePath, output, 'utf8');
   }
 
