@@ -5,6 +5,21 @@
 格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，
 并遵循 [Semantic Versioning](https://semver.org/lang/zh-CN/)（语义化版本）。
 
+## [0.2.0] -2026-04-01
+
+### 新增
+
+- CLI 新增 `--functions` 参数，支持逗号分隔和重复传参，按函数名定向生成类型。
+- CLI 新增 `--json` 成功结构化输出模式，便于脚本与 CI 集成。
+- CLI 新增 `--silent` 静默模式，成功时不输出日志，失败仍输出错误信息。
+- `--swagger` 新增本地 JSON 文件输入能力，支持离线/内网场景（如 `./openapi.json`）。
+- 新增 `src/__tests__/cli.test.ts`，覆盖 `--functions`、幂等重复执行、`--json`、`--silent`、本地 JSON 输入场景。
+
+### 文档
+
+- README（中/英）补充本地 Swagger/OpenAPI JSON 格式要求与最小示例。
+- README（中/英）“所有参数/All Flags”表新增“是否必填/Required”与“默认处理行为”。
+
 ## [0.1.4] -2026-03-31
 
 ###变更

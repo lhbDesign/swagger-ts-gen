@@ -84,8 +84,8 @@ npx swagger-ts-mcp --file src/api/user.ts --swagger https://your-api/doc.html
 
 ```json
 {
- "swaggerUrl": "https://your-api/doc.html",
- "defaultFiles": ["src/api/user.ts"]
+  "swaggerUrl": "https://your-api/doc.html",
+  "defaultFiles": ["src/api/user.ts"]
 }
 ```
 
@@ -116,7 +116,7 @@ Before:
 ```typescript
 // Cancel publish
 export async function cancelPublishApi(params?: any) {
- return requestClient.get("/model/publish/cancel", { params });
+  return requestClient.get("/model/publish/cancel", { params });
 }
 ```
 
@@ -125,13 +125,13 @@ After:
 ```typescript
 /** Cancel publish request params */
 export interface CancelPublishParams {
- /** Model ID */
- modelId?: number;
+  /** Model ID */
+  modelId?: number;
 }
 
 // Cancel publish
 export async function cancelPublishApi(params?: CancelPublishParams) {
- return requestClient.get("/model/publish/cancel", { params });
+  return requestClient.get("/model/publish/cancel", { params });
 }
 ```
 
@@ -143,21 +143,21 @@ Create `swagger-ts-gen.config.json` in your project root:
 
 ```json
 {
- "swaggerUrl": "https://your-api/doc.html",
- "defaultFiles": ["src/api/user.ts", "src/api/order.ts"],
- "endpointPrefix": "/algo",
- "clientName": "requestClient",
- "outputStyle": "interface"
+  "swaggerUrl": "https://your-api/doc.html",
+  "defaultFiles": ["src/api/user.ts", "src/api/order.ts"],
+  "endpointPrefix": "/algo",
+  "clientName": "requestClient",
+  "outputStyle": "interface"
 }
 ```
 
-| Option | Type | Default | Description |
-| ---------------- | ----------------------- | ----------------- | ------------------------------------------------------------------------------------------------ |
-| `swaggerUrl` | `string` | — | Swagger doc URL. Supports `doc.html`, `/v3/api-docs`, `/v2/api-docs` |
-| `defaultFiles` | `string[]` | — | Default API file path list |
-| `endpointPrefix` | `string` | `""` | API path prefix. If code uses `/algo/user/list` but Swagger has `/user/list`, set `/algo` |
-| `clientName` | `string` | `"requestClient"` | HTTP client object name, e.g. `axios`, `http`, `request` |
-| `outputStyle` | `"interface" \| "type"` | `"interface"` | Generated type style |
+| Option           | Type                    | Default           | Description                                                                               |
+| ---------------- | ----------------------- | ----------------- | ----------------------------------------------------------------------------------------- |
+| `swaggerUrl`     | `string`                | —                 | Swagger doc URL. Supports `doc.html`, `/v3/api-docs`, `/v2/api-docs`                      |
+| `defaultFiles`   | `string[]`              | —                 | Default API file path list                                                                |
+| `endpointPrefix` | `string`                | `""`              | API path prefix. If code uses `/algo/user/list` but Swagger has `/user/list`, set `/algo` |
+| `clientName`     | `string`                | `"requestClient"` | HTTP client object name, e.g. `axios`, `http`, `request`                                  |
+| `outputStyle`    | `"interface" \| "type"` | `"interface"`     | Generated type style                                                                      |
 
 ---
 
@@ -167,9 +167,9 @@ Create `swagger-ts-gen.config.json` in your project root:
 - That means it loads config from the directory where you run the command
 - `--file` relative path is also resolved from current working directory
 - CLI flags override config values:
- - `--swagger`
- - `--endpoint-prefix`
- - `--client-name`
+- `--swagger`
+- `--endpoint-prefix`
+- `--client-name`
 
 Example:
 
@@ -205,14 +205,17 @@ pnpm exec swagger-ts-mcp --file src/api/user.ts --swagger https://your-api/doc.h
 
 ### All Flags
 
-| Flag | Description | Example |
-| ------------------- | ----------------------------- | -------------------------------------------- |
-| `--file` | Target API file path | `--file src/api/user.ts` |
-| `--swagger` | Swagger doc URL | `--swagger https://api.example.com/doc.html` |
-| `--dry-run` | Preview mode, no file changes | `--dry-run` |
-| `--mcp` | Start as MCP Server | `--mcp` |
-| `--endpoint-prefix` | API path prefix override | `--endpoint-prefix /algo` |
-| `--client-name` | HTTP client name override | `--client-name axios` |
+| Flag                | Required?     | Default behavior when omitted                                    | Description                                                     | Example                                      |
+| ------------------- | ------------- | ---------------------------------------------------------------- | --------------------------------------------------------------- | -------------------------------------------- |
+| `--file`            | Conditionally | Uses `defaultFiles` from config; exits with error if still empty | Target API file path                                            | `--file src/api/user.ts`                     |
+| `--swagger`         | Conditionally | Uses `swaggerUrl` from config; exits with error if still empty   | Swagger doc URL or local JSON file path                         | `--swagger https://api.example.com/doc.html` |
+| `--functions`       | Optional      | Processes all eligible functions in target file                  | Process only specific functions (comma-separated or repeatable) | `--functions getUserApi,createUserApi`       |
+| `--dry-run`         | Optional      | `false`                                                          | Preview mode, no file changes                                   | `--dry-run`                                  |
+| `--json`            | Optional      | `false`                                                          | Print structured JSON on success                                | `--json`                                     |
+| `--silent`          | Optional      | `false`                                                          | Suppress success logs (still prints errors)                     | `--silent`                                   |
+| `--mcp`             | Optional      | `false`                                                          | Start as MCP Server                                             | `--mcp`                                      |
+| `--endpoint-prefix` | Optional      | Uses config `endpointPrefix`; falls back to empty string         | API path prefix override                                        | `--endpoint-prefix /algo`                    |
+| `--client-name`     | Optional      | Uses config `clientName`; falls back to `requestClient`          | HTTP client name override                                       | `--client-name axios`                        |
 
 ---
 
@@ -226,14 +229,14 @@ Add to your project's `.kiro/settings/mcp.json`:
 
 ```json
 {
- "mcpServers": {
- "swagger-ts-mcp": {
- "command": "npx",
- "args": ["swagger-ts-mcp", "--mcp"],
- "disabled": false,
- "autoApprove": ["generate_types"]
- }
- }
+  "mcpServers": {
+    "swagger-ts-mcp": {
+      "command": "npx",
+      "args": ["swagger-ts-mcp", "--mcp"],
+      "disabled": false,
+      "autoApprove": ["generate_types"]
+    }
+  }
 }
 ```
 
@@ -243,12 +246,12 @@ Add in `.cursor/mcp.json` or your IDE MCP config:
 
 ```json
 {
- "mcpServers": {
- "swagger-ts-mcp": {
- "command": "npx",
- "args": ["swagger-ts-mcp", "--mcp"]
- }
- }
+  "mcpServers": {
+    "swagger-ts-mcp": {
+      "command": "npx",
+      "args": ["swagger-ts-mcp", "--mcp"]
+    }
+  }
 }
 ```
 
@@ -272,12 +275,12 @@ After configuration, in Cursor press `Cmd+Shift+P`, search `MCP`, and click **Re
 
 Tool name: `generate_types`
 
-| Parameter | Type | Required | Description |
-|--------------- | ---------- | -------- | -------------------------------------------------- |
-| `filePath` | `string` | ✅ | Target API file path |
-| `swaggerUrl` | `string` | — | Swagger doc URL (overrides config) |
-| `functionNames` | `string[]` | — | Process only specified functions |
-| `dryRun` | `boolean` | — | Preview mode, no file changes |
+| Parameter       | Type       | Required | Description                        |
+| --------------- | ---------- | -------- | ---------------------------------- |
+| `filePath`      | `string`   | ✅       | Target API file path               |
+| `swaggerUrl`    | `string`   | —        | Swagger doc URL (overrides config) |
+| `functionNames` | `string[]` | —        | Process only specified functions   |
+| `dryRun`        | `boolean`  | —        | Preview mode, no file changes      |
 
 ---
 
@@ -290,6 +293,40 @@ Pass `doc.html` directly. The tool auto-converts to `/v3/api-docs` or `/v2/api-d
 ```bash
 swagger-ts-mcp --file src/api/user.ts --swagger https://your-api/doc.html
 ```
+
+### Local Swagger/OpenAPI JSON format requirements
+
+When passing a local file to `--swagger` (for example `./openapi.json`), the file should satisfy:
+
+- Valid JSON (UTF-8 recommended, usually `.json` extension)
+- Top-level object must be a Swagger/OpenAPI document
+- Must include `paths` (object)
+- Keep `openapi` (OpenAPI 3) or `swagger` (Swagger 2) when available
+- Referenced models should be in `components.schemas` (OpenAPI 3) or `definitions` (Swagger 2)
+
+Minimal example:
+
+```json
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/user/get": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+For offline docs exported from Swagger/OpenAPI tools (same idea for other tools), place the exported JSON file in your project (or any local path), then pass that file path to `--swagger`.
+Example: `/Users/code/Desktop/work/2025/apps/algo/default_OpenAPI.json`
+
+![alt text](openapi.png)
 
 ### Knife4j
 
@@ -335,11 +372,11 @@ Write back to file
 
 ### Naming Rules
 
-| Type | Rule | Example |
-| -------------------- | ------------------ | ------------------ |
+| Type                | Rule               | Example             |
+| ------------------- | ------------------ | ------------------- |
 | Request params type | `{BaseName}Params` | `GetUserListParams` |
-| Response body type | `{BaseName}Result` | `GetUserListResult` |
-| Response data type | `{BaseName}Data` | `GetUserListData` |
+| Response body type  | `{BaseName}Result` | `GetUserListResult` |
+| Response data type  | `{BaseName}Data`   | `GetUserListData`   |
 
 Function name conversion: `getUserListApi` → remove `Api` suffix → capitalize first letter → `GetUserList`
 
@@ -389,11 +426,15 @@ Add `--dry-run`.
 
 **Q: I only want to process specific functions.**
 
+In CLI mode, use `--functions` (supports comma-separated values or repeating the flag).
+Example: `--functions getUserApi,createUserApi` or `--functions getUserApi --functions createUserApi`.
+
 In MCP mode, pass `functionNames`.
 
 **Q: What if Swagger docs require login/authentication?**
 
 Auth headers are not supported currently. You can open `/v3/api-docs` in browser, save the JSON locally, then use that.
+CLI example: `swagger-ts-mcp --file src/api/user.ts --swagger ./openapi.json`.
 
 **Q: `npx tsx packages/swagger-ts-gen/bin/index.ts` errors out?**
 
